@@ -86,7 +86,30 @@ public extension CGPath {
 	public func point(at percent: CGFloat) -> CGPoint? {
 
 		return point(at: percent, with: elements)
-	}
+    }
+    
+    // MARK: - Quadratic
+    
+    public class func quadCurveLength(p0: CGPoint, c1: CGPoint, p1: CGPoint) -> CGFloat {
+        
+        var approxDist: CGFloat = 0
+        
+        let approxSteps: CGFloat = 100
+        
+        for i in 0..<Int(approxSteps) {
+            
+            let t0 = CGFloat(i) / approxSteps
+            let t1 = CGFloat(i+1) / approxSteps
+            
+            let a = CGPath.quadCurvePoint(t: t0, p0: p0, c1: c1, p1: p1)
+            let b = CGPath.quadCurvePoint(t: t1, p0: p0, c1: c1, p1: p1)
+            
+            approxDist += a.distance(to: b)
+            
+        }
+        
+        return approxDist
+    }
 
 }
 
@@ -152,14 +175,14 @@ extension CGPath {
 					break
 				}
 
-				let l = quadCurveLength(p0: p0, c1: c1, p1: p1)
+				let l = CGPath.quadCurveLength(p0: p0, c1: c1, p1: p1)
 
 				if lengthTraversed + l >= percentLength {
 
 					let lengthInSubpath = percentLength - lengthTraversed
 
 					let t = lengthInSubpath / l
-					return quadCurvePoint(t: t, p0: p0, c1: c1, p1: p1)
+					return CGPath.quadCurvePoint(t: t, p0: p0, c1: c1, p1: p1)
 
 				}
 
@@ -271,7 +294,7 @@ extension CGPath {
 					break
 				}
 
-				length += quadCurveLength(p0: p0, c1: c1, p1: p1)
+				length += CGPath.quadCurveLength(p0: p0, c1: c1, p1: p1)
 
 				currentPoint = p1
 
@@ -344,28 +367,7 @@ extension CGPath {
 
 	// MARK: - Quadratic
 
-	func quadCurveLength(p0: CGPoint, c1: CGPoint, p1: CGPoint) -> CGFloat {
-
-		var approxDist: CGFloat = 0
-
-		let approxSteps: CGFloat = 100
-
-		for i in 0..<Int(approxSteps) {
-
-			let t0 = CGFloat(i) / approxSteps
-			let t1 = CGFloat(i+1) / approxSteps
-
-			let a = quadCurvePoint(t: t0, p0: p0, c1: c1, p1: p1)
-			let b = quadCurvePoint(t: t1, p0: p0, c1: c1, p1: p1)
-
-			approxDist += a.distance(to: b)
-
-		}
-
-		return approxDist
-	}
-
-	func quadCurvePoint(t: CGFloat, p0: CGPoint, c1: CGPoint, p1: CGPoint) -> CGPoint {
+	class func quadCurvePoint(t: CGFloat, p0: CGPoint, c1: CGPoint, p1: CGPoint) -> CGPoint {
 
 		let x = quadCurveValue(t: t, p0: p0.x, c1: c1.x, p1: p1.x)
 		let y = quadCurveValue(t: t, p0: p0.y, c1: c1.y, p1: p1.y)
@@ -374,7 +376,7 @@ extension CGPath {
 
 	}
 
-	func quadCurveValue(t: CGFloat, p0: CGFloat, c1: CGFloat, p1: CGFloat) -> CGFloat {
+	class func quadCurveValue(t: CGFloat, p0: CGFloat, c1: CGFloat, p1: CGFloat) -> CGFloat {
 
 		var value: CGFloat = 0.0
 
